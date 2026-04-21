@@ -467,9 +467,88 @@ body.loaded { opacity: 1; }
   .countdown-num { font-size: 1.5rem; }
   .candles-row { gap: 7px; }
 }
+
+/* ===== LOCK GATE (hides site until May 16, 2026) ===== */
+#lock-gate {
+  position: fixed; inset: 0; z-index: 9999;
+  background: radial-gradient(ellipse at top, var(--cream) 0%, var(--mocha-100) 70%, var(--mocha-200) 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 2rem; gap: 1.5rem;
+  font-family: var(--font-body); color: var(--mocha-600);
+}
+#lock-gate.hidden { display: none; }
+.lock-kitty {
+  width: 140px; height: 140px;
+  background: radial-gradient(circle at 50% 55%, white 0%, white 55%, var(--blush-light) 100%);
+  border-radius: 50%;
+  box-shadow: 0 12px 40px rgba(139,94,60,0.25), inset 0 -8px 16px rgba(255,158,192,0.3);
+  position: relative;
+  animation: lock-float 3.5s ease-in-out infinite;
+}
+.lock-kitty::before, .lock-kitty::after {
+  content: ''; position: absolute; top: -18px;
+  width: 45px; height: 45px; background: inherit; border-radius: 50% 50% 0 50%;
+  box-shadow: inset 0 -4px 8px rgba(255,158,192,0.3);
+}
+.lock-kitty::before { left: 8px; transform: rotate(-15deg); }
+.lock-kitty::after { right: 8px; transform: rotate(105deg); }
+.lock-bow {
+  position: absolute; top: 8px; right: 14px;
+  width: 28px; height: 20px;
+  background: var(--kitty-pink);
+  clip-path: polygon(0 50%, 35% 0, 35% 100%, 65% 0, 65% 100%, 100% 50%);
+  z-index: 2;
+}
+@keyframes lock-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.lock-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3rem);
+  color: var(--mocha-500);
+  margin-top: 0.5rem;
+}
+.lock-sub {
+  font-family: var(--font-serif); font-style: italic;
+  font-size: clamp(0.95rem, 2vw, 1.15rem);
+  color: var(--mocha-400);
+  max-width: 420px; line-height: 1.5;
+}
+.lock-days {
+  font-family: var(--font-serif);
+  font-size: clamp(4rem, 12vw, 7rem);
+  font-weight: 700;
+  color: var(--blush-deep);
+  line-height: 1;
+  text-shadow: 0 4px 20px rgba(232,127,160,0.3);
+}
+.lock-days-label {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--mocha-400);
+  margin-top: -0.25rem;
+}
+.lock-date {
+  margin-top: 1rem;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--mocha-300);
+  opacity: 0.7;
+}
 </style>
 </head>
 <body>
+
+<div id="lock-gate">
+  <div class="lock-kitty"><div class="lock-bow"></div></div>
+  <div class="lock-title">something's coming ♡</div>
+  <div class="lock-days" id="lockDays">—</div>
+  <div class="lock-days-label">days to go</div>
+  <div class="lock-sub">a little surprise is hiding here. come back on your day.</div>
+  <div class="lock-date">unlocks may 16, 2026</div>
+</div>
 
 <nav class="nav-dots" id="navDots">
   <div class="nav-dot active" data-section="hero" data-label="start"></div>
@@ -633,6 +712,38 @@ body.loaded { opacity: 1; }
 const revealObs = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
 }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+// ===== LOCK GATE =====
+(function lockGate() {
+  const gate = document.getElementById('lock-gate');
+  if (!gate) return;
+  // Unlock at midnight CDT on May 16, 2026. CDT = UTC-5.
+  const unlockAt = new Date('2026-05-16T00:00:00-05:00').getTime();
+  const now = Date.now();
+  if (now >= unlockAt) {
+    gate.classList.add('hidden');
+    return;
+  }
+  // Bypass for Kevin: ?preview=1 hides the gate
+  if (new URLSearchParams(location.search).get('preview') === '1') {
+    gate.classList.add('hidden');
+    return;
+  }
+  // Freeze scroll while gate is up
+  document.body.style.overflow = 'hidden';
+  const daysEl = document.getElementById('lockDays');
+  function tick() {
+    const ms = unlockAt - Date.now();
+    if (ms <= 0) {
+      gate.classList.add('hidden');
+      document.body.style.overflow = '';
+      return;
+    }
+    daysEl.textContent = Math.ceil(ms / 86400000);
+  }
+  tick();
+  setInterval(tick, 60 * 60 * 1000); // update hourly
+})();
 
 // ===== LIGHTBOX =====
 const lightbox = document.getElementById('lightbox');
