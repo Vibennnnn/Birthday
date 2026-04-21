@@ -113,6 +113,28 @@ body.loaded { opacity: 1; }
 @keyframes orb1 { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-28px) scale(1.06); } }
 @keyframes orb2 { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-18px) rotate(12deg); } }
 
+/* Hero sparkles — gentle ambient drift */
+.hero-sparkles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1; }
+.hero-sparkle {
+  position: absolute;
+  width: var(--sp-sz); height: var(--sp-sz);
+  left: var(--sp-left); bottom: -12px;
+  background: radial-gradient(circle, rgba(255,255,255,0.95) 0%, var(--sp-col) 45%, transparent 75%);
+  border-radius: 50%;
+  opacity: 0;
+  animation: sparkle-drift var(--sp-dur) ease-in-out infinite var(--sp-delay);
+  will-change: transform, opacity;
+}
+@keyframes sparkle-drift {
+  0%   { transform: translate3d(0, 0, 0) scale(0.4); opacity: 0; }
+  12%  { opacity: var(--sp-op); }
+  50%  { transform: translate3d(var(--sp-sway), -52vh, 0) scale(1); }
+  88%  { opacity: var(--sp-op); }
+  100% { transform: translate3d(0, -108vh, 0) scale(0.3); opacity: 0; }
+}
+
+.kitty-wrapper, .hero-eyebrow, .hero-title, .hero-name, .hero-age, .countdown, .scroll-hint { position: relative; z-index: 2; }
+
 /* Hello Kitty CSS Art */
 .kitty-wrapper { animation: kitty-float 4s ease-in-out infinite; margin-bottom: 2.5rem; }
 @keyframes kitty-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
@@ -493,6 +515,7 @@ body.loaded { opacity: 1; }
   <div class="hero-orb"></div>
   <div class="hero-orb"></div>
   <div class="hero-orb"></div>
+  <div class="hero-sparkles" id="heroSparkles"></div>
 
   <div class="kitty-wrapper">
     <div class="kitty">
@@ -780,6 +803,31 @@ for (let i = 0; i < 90; i++) {
   s.className = 'star';
   s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;width:${sz}px;height:${sz}px;--dur:${1.4+Math.random()*2.2}s;--delay:${Math.random()*3}s`;
   starsEl.appendChild(s);
+}
+
+// ===== HERO SPARKLES =====
+const heroSparklesEl = document.getElementById('heroSparkles');
+const sparkleColors = [
+  'rgba(255,158,192,0.75)',
+  'rgba(232,127,160,0.65)',
+  'rgba(255,214,228,0.85)',
+  'rgba(255,249,245,0.9)',
+  'rgba(245,228,208,0.75)'
+];
+for (let i = 0; i < 32; i++) {
+  const sp = document.createElement('div');
+  sp.className = 'hero-sparkle';
+  const sz = 2 + Math.random() * 4;
+  const dur = 9 + Math.random() * 8;
+  sp.style.cssText =
+    `--sp-sz:${sz.toFixed(1)}px;` +
+    `--sp-left:${(Math.random() * 100).toFixed(1)}%;` +
+    `--sp-dur:${dur.toFixed(1)}s;` +
+    `--sp-delay:${(-Math.random() * dur).toFixed(1)}s;` +
+    `--sp-sway:${((Math.random() - 0.5) * 70).toFixed(0)}px;` +
+    `--sp-op:${(0.4 + Math.random() * 0.45).toFixed(2)};` +
+    `--sp-col:${sparkleColors[Math.floor(Math.random() * sparkleColors.length)]}`;
+  heroSparklesEl.appendChild(sp);
 }
 
 // ===== CANDLES =====
