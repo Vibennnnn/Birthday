@@ -732,8 +732,15 @@ body.loaded { opacity: 1; }
 
 <script>
 // ===== SCROLL REVEAL (must be defined early - referenced by gallery/facts) =====
+// Stagger elements that enter the viewport together so sections cascade in rather than popping as a block.
 const revealObs = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  const visible = entries.filter(e => e.isIntersecting);
+  visible.forEach((e, i) => {
+    const delay = Math.min(i, 6) * 0.09;
+    e.target.style.transitionDelay = `${delay}s`;
+    e.target.classList.add('visible');
+    revealObs.unobserve(e.target);
+  });
 }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
 // ===== LOCK GATE =====
