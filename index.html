@@ -504,6 +504,143 @@ body.loaded { opacity: 1; }
   .candles-row { gap: 7px; }
 }
 
+/* ===== CANDLE TAP TARGETS ===== */
+.candle {
+  padding: 10px 8px;
+  border-radius: 14px;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.candle:active:not(.out) { transform: scale(0.92); }
+
+/* ===== MIC BLOW BUTTON ===== */
+.mic-btn {
+  margin-top: 1.2rem;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,183,207,0.45);
+  color: var(--blush-light);
+  padding: 0.6rem 1.2rem;
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, opacity 0.3s;
+  backdrop-filter: blur(6px);
+}
+.mic-btn:hover { background: rgba(255,183,207,0.15); border-color: var(--blush); }
+.mic-btn.listening {
+  background: rgba(255,158,192,0.22);
+  border-color: var(--kitty-pink);
+  color: white;
+  animation: mic-pulse 1.6s ease-in-out infinite;
+}
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,158,192,0.45); }
+  50%      { box-shadow: 0 0 0 12px rgba(255,158,192,0); }
+}
+.mic-hint {
+  margin-top: 0.6rem;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 0.05em;
+  min-height: 1rem;
+}
+
+/* ===== ENVELOPE (unlocks after all candles) ===== */
+.envelope-btn {
+  display: none;
+  margin: 2rem auto 0;
+  background: linear-gradient(160deg, #FFF4E6 0%, #FFE4EC 100%);
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 18px;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--mocha-500);
+  cursor: pointer;
+  box-shadow: 0 8px 28px rgba(232,127,160,0.3);
+  transition: transform 0.25s, box-shadow 0.25s;
+  animation: envelope-in 1.2s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+.envelope-btn.show { display: inline-block; }
+.envelope-btn:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 14px 40px rgba(232,127,160,0.45); }
+@keyframes envelope-in {
+  0%   { opacity: 0; transform: translateY(20px) scale(0.85); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ===== LETTER OVERLAY ===== */
+.letter-overlay {
+  position: fixed; inset: 0;
+  background: rgba(26, 10, 3, 0.75);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 2rem;
+}
+.letter-overlay.open { display: flex; animation: lb-fade 0.4s ease; }
+.letter-paper {
+  position: relative;
+  max-width: 520px; width: 100%;
+  max-height: 85vh; overflow-y: auto;
+  background:
+    radial-gradient(ellipse at top left, rgba(255,183,207,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse at bottom right, rgba(212,168,130,0.12) 0%, transparent 60%),
+    linear-gradient(180deg, #FFF8F0 0%, #FFF0E0 100%);
+  padding: 3rem 2.4rem;
+  border-radius: 6px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.5), inset 0 0 60px rgba(212,168,130,0.08);
+  transform: rotate(-0.6deg);
+  animation: letter-open 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+  font-family: var(--font-serif);
+  color: var(--mocha-600);
+}
+@keyframes letter-open {
+  0%   { opacity: 0; transform: rotate(-6deg) translateY(40px) scale(0.88); }
+  100% { opacity: 1; transform: rotate(-0.6deg) translateY(0) scale(1); }
+}
+.letter-paper::before {
+  content: ''; position: absolute;
+  top: -14px; left: 50%;
+  width: 80px; height: 24px;
+  transform: translateX(-50%) rotate(-3deg);
+  background: linear-gradient(135deg, rgba(255,158,192,0.55), rgba(255,183,207,0.75), rgba(255,158,192,0.55));
+  border-left: 1px dashed rgba(255,255,255,0.45);
+  border-right: 1px dashed rgba(255,255,255,0.45);
+  box-shadow: 0 2px 5px rgba(107,66,38,0.1);
+}
+.letter-greeting {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: var(--blush-deep);
+  margin-bottom: 1rem;
+}
+.letter-body {
+  font-style: italic;
+  font-size: 1rem;
+  line-height: 1.9;
+  color: var(--mocha-500);
+  white-space: pre-wrap;
+}
+.letter-sig {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  color: var(--mocha-400);
+  margin-top: 1.5rem;
+  text-align: right;
+}
+.letter-close {
+  position: absolute; top: 0.8rem; right: 0.8rem;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(139,94,60,0.12); border: none; color: var(--mocha-500);
+  font-size: 1.1rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, transform 0.2s;
+}
+.letter-close:hover { background: rgba(139,94,60,0.22); transform: scale(1.1); }
+
 /* ===== LOCK GATE (hides site until May 16, 2026) ===== */
 #lock-gate {
   position: fixed; inset: 0; z-index: 9999;
@@ -664,8 +801,28 @@ body.loaded { opacity: 1; }
   <p class="candles-sub">click each candle to blow it out</p>
   <p class="candle-progress" id="candleProgress">0 / 14 candles blown out</p>
   <div class="candles-row" id="candlesRow"></div>
+  <button class="mic-btn" id="micBtn" onclick="toggleMicBlow()">use your breath instead ♡</button>
+  <div class="mic-hint" id="micHint"></div>
   <div class="wish-msg" id="wishMsg">🎀 Make a wish, Iva! 🎀</div>
+  <button class="envelope-btn" id="envelopeBtn" onclick="openLetter()">✉ open your letter ♡</button>
 </section>
+
+<!-- ===== LETTER OVERLAY ===== -->
+<div class="letter-overlay" id="letterOverlay">
+  <div class="letter-paper">
+    <button class="letter-close" onclick="closeLetter()">✕</button>
+    <div class="letter-greeting">Dear Iva,</div>
+    <!-- KEVIN: write your real letter here before May 16 -->
+    <div class="letter-body">i wasn't sure how to say any of this out loud, so i built you a website instead.
+
+you know when a song hits at the exact right time and you can't explain why? that's kind of what knowing you has been like. everything feels a little warmer when you're around, even the stuff that's supposed to be boring.
+
+i hope 14 is soft. i hope you draw more, listen to the weird albums first, and keep being annoying in the good way. whoever gets to be near you this year is lucky.
+
+happy birthday. i'm really glad you exist.</div>
+    <div class="letter-sig">— Kevin ♡</div>
+  </div>
+</div>
 
 <!-- ===== MESSAGES ===== -->
 <section id="messages">
@@ -972,13 +1129,144 @@ for (let i = 0; i < TOTAL; i++) {
     }
 
     document.getElementById('candleProgress').textContent = `${blown} / ${TOTAL} candles blown out`;
-    if (blown === TOTAL) {
-      document.getElementById('wishMsg').classList.add('show');
-      launchConfetti();
-      playChime();
-    }
+    if (blown === TOTAL) allCandlesBlown();
   });
   candlesRow.appendChild(el);
+}
+
+function blowCandleByIndex(i) {
+  const c = candlesRow.children[i];
+  if (!c || c.classList.contains('out')) return false;
+  c.click();
+  return true;
+}
+
+function allCandlesBlown() {
+  document.getElementById('wishMsg').classList.add('show');
+  launchConfetti();
+  playChime();
+  localStorage.setItem('ivaLetterUnlocked', '1');
+  setTimeout(() => document.getElementById('envelopeBtn').classList.add('show'), 900);
+}
+
+// Show envelope on reload if already unlocked
+if (localStorage.getItem('ivaLetterUnlocked') === '1') {
+  document.getElementById('envelopeBtn').classList.add('show');
+}
+
+// ===== LETTER =====
+function openLetter() {
+  document.getElementById('letterOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLetter() {
+  document.getElementById('letterOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('letterOverlay').addEventListener('click', e => {
+  if (e.target.id === 'letterOverlay') closeLetter();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLetter();
+});
+
+// ===== MIC BLOW DETECTION =====
+let micStream = null, micAnalyser = null, micRAF = null, micListening = false;
+let micBaseline = 0.02, micCooldown = 0;
+
+async function toggleMicBlow() {
+  const btn = document.getElementById('micBtn');
+  const hint = document.getElementById('micHint');
+
+  if (micListening) {
+    stopMicBlow();
+    btn.textContent = 'use your breath instead ♡';
+    btn.classList.remove('listening');
+    hint.textContent = '';
+    return;
+  }
+
+  try {
+    hint.textContent = 'listening for a breath...';
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: {
+      echoCancellation: false, noiseSuppression: false, autoGainControl: false
+    }});
+    const ctx = getACtx();
+    const src = ctx.createMediaStreamSource(micStream);
+    micAnalyser = ctx.createAnalyser();
+    micAnalyser.fftSize = 1024;
+    src.connect(micAnalyser);
+
+    micListening = true;
+    btn.textContent = 'listening... blow at your screen';
+    btn.classList.add('listening');
+
+    // Calibrate ambient noise for 1.5s
+    const samples = [];
+    const calibrateStart = performance.now();
+    const buf = new Uint8Array(micAnalyser.fftSize);
+
+    function calibrate() {
+      if (!micListening) return;
+      micAnalyser.getByteTimeDomainData(buf);
+      let sum = 0;
+      for (let i = 0; i < buf.length; i++) {
+        const v = (buf[i] - 128) / 128;
+        sum += v * v;
+      }
+      samples.push(Math.sqrt(sum / buf.length));
+      if (performance.now() - calibrateStart < 1500) {
+        requestAnimationFrame(calibrate);
+      } else {
+        const avg = samples.reduce((a,b) => a+b, 0) / samples.length;
+        micBaseline = Math.max(0.015, avg);
+        hint.textContent = 'ready — blow softly ♡';
+        listenForBlow();
+      }
+    }
+    calibrate();
+  } catch (err) {
+    hint.textContent = 'no worries, just tap them ♡';
+    btn.textContent = 'use your breath instead ♡';
+    btn.classList.remove('listening');
+    micListening = false;
+  }
+}
+
+function listenForBlow() {
+  const buf = new Uint8Array(micAnalyser.fftSize);
+  const threshold = micBaseline * 4 + 0.04;
+
+  function loop() {
+    if (!micListening) return;
+    micAnalyser.getByteTimeDomainData(buf);
+    let sum = 0;
+    for (let i = 0; i < buf.length; i++) {
+      const v = (buf[i] - 128) / 128;
+      sum += v * v;
+    }
+    const rms = Math.sqrt(sum / buf.length);
+
+    if (rms > threshold && micCooldown <= 0) {
+      // Find first lit candle and blow it
+      for (let i = 0; i < TOTAL; i++) {
+        if (blowCandleByIndex(i)) {
+          micCooldown = 20; // ~0.33s at 60fps
+          break;
+        }
+      }
+    }
+    if (micCooldown > 0) micCooldown--;
+    micRAF = requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+function stopMicBlow() {
+  micListening = false;
+  if (micRAF) cancelAnimationFrame(micRAF);
+  if (micStream) micStream.getTracks().forEach(t => t.stop());
+  micStream = null; micAnalyser = null;
 }
 
 // ===== GALLERY =====
