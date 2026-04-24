@@ -193,9 +193,22 @@ body.loaded { opacity: 1; }
 }
 .hero-name {
   font-family: var(--font-display); font-size: clamp(5.5rem, 18vw, 10rem);
-  background: linear-gradient(135deg, var(--mocha-400) 0%, var(--blush-deep) 50%, var(--mocha-300) 100%);
+  background: linear-gradient(
+    110deg,
+    var(--mocha-400) 0%,
+    var(--blush-deep) 25%,
+    var(--kitty-pink) 45%,
+    var(--blush-deep) 65%,
+    var(--mocha-300) 100%
+  );
+  background-size: 220% 220%;
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   line-height: 0.88; text-align: center; letter-spacing: -0.02em;
+  animation: name-shimmer 7s ease-in-out infinite;
+}
+@keyframes name-shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
 }
 .hero-age {
   font-size: 1rem; color: var(--mocha-400); margin-top: 1rem;
