@@ -1343,7 +1343,7 @@ function animateConfetti() {
 // ===== GAME =====
 const gc = document.getElementById('gameCanvas');
 const gctx = gc.getContext('2d');
-let gRunning = false, gScore = 0, gTime = 30, gInterval = null, gHearts = [];
+let gRunning = false, gScore = 0, gTime = 30, gInterval = null, gHearts = [], gParticles = [];
 let gBest = parseInt(localStorage.getItem('ivaBirthdayBest') || '0');
 document.getElementById('gBest').textContent = gBest;
 
@@ -1375,9 +1375,43 @@ class GHeart {
   hit_test(mx, my) { return Math.hypot(mx - this.x, my - (this.y + this.r * 0.5)) < this.r * 1.2; }
 }
 
+class GSparkle {
+  constructor(x, y, color) {
+    this.x = x; this.y = y;
+    const ang = Math.random() * Math.PI * 2;
+    const sp = 1.6 + Math.random() * 3.2;
+    this.vx = Math.cos(ang) * sp;
+    this.vy = Math.sin(ang) * sp - 1.2;
+    this.r = 1.6 + Math.random() * 2.6;
+    this.color = color;
+    this.life = 0;
+    this.maxLife = 26 + Math.random() * 14;
+  }
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+    this.vy += 0.14;
+    this.vx *= 0.96;
+    this.life++;
+  }
+  draw() {
+    const a = Math.max(0, 1 - this.life / this.maxLife);
+    gctx.save();
+    gctx.globalAlpha = a;
+    gctx.shadowColor = this.color;
+    gctx.shadowBlur = 8;
+    gctx.fillStyle = this.color;
+    gctx.beginPath();
+    gctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+    gctx.fill();
+    gctx.restore();
+  }
+  get dead() { return this.life >= this.maxLife; }
+}
+
 function startGame() {
   if (gRunning) return;
-  gRunning = true; gScore = 0; gTime = 30; gHearts = [];
+  gRunning = true; gScore = 0; gTime = 30; gHearts = []; gParticles = [];
   document.getElementById('gScore').textContent = '0';
   document.getElementById('gTime').textContent = '30';
   const btn = document.getElementById('gBtn');
@@ -1413,11 +1447,14 @@ function endGame(spawn) {
 }
 
 function gameLoop() {
-  if (!gRunning && gHearts.every(h => h.hit && h.alpha <= 0)) return;
+  if (!gRunning && gHearts.every(h => h.hit && h.alpha <= 0) && gParticles.length === 0) return;
   gctx.clearRect(0, 0, gc.width, gc.height);
   gctx.fillStyle = '#FFF9F5'; gctx.fillRect(0, 0, gc.width, gc.height);
   gHearts = gHearts.filter(h => !(h.y > gc.height + 40 || (h.hit && h.alpha <= 0)));
   gHearts.forEach(h => { if (!h.hit) h.y += h.vy; h.draw(); });
+  gParticles.forEach(p => p.update());
+  gParticles = gParticles.filter(p => !p.dead);
+  gParticles.forEach(p => p.draw());
   requestAnimationFrame(gameLoop);
 }
 
@@ -1429,6 +1466,11 @@ gc.addEventListener('click', e => {
   for (let i = gHearts.length - 1; i >= 0; i--) {
     if (!gHearts[i].hit && gHearts[i].hit_test(mx, my)) {
       gHearts[i].hit = true; gScore++;
+      const h = gHearts[i];
+      const sparkleColors = [h.color, '#FFF4E6', '#FFD6E4', '#FFE9A8'];
+      for (let k = 0; k < 9; k++) {
+        gParticles.push(new GSparkle(h.x, h.y + h.r * 0.5, sparkleColors[k % sparkleColors.length]));
+      }
       document.getElementById('gScore').textContent = gScore;
       playPop(); break;
     }
