@@ -1409,6 +1409,41 @@ class GSparkle {
   get dead() { return this.life >= this.maxLife; }
 }
 
+class GScorePop {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.vy = -1.4;
+    this.life = 0;
+    this.maxLife = 46;
+  }
+  update() {
+    this.y += this.vy;
+    this.vy *= 0.95;
+    this.life++;
+  }
+  draw() {
+    const t = this.life / this.maxLife;
+    const fadeIn = Math.min(1, this.life / 3);
+    const fadeOut = t > 0.55 ? 1 - (t - 0.55) / 0.45 : 1;
+    const a = Math.max(0, fadeIn * fadeOut);
+    const scale = 1 + Math.min(1, this.life / 7) * 0.35;
+    gctx.save();
+    gctx.globalAlpha = a;
+    gctx.translate(this.x, this.y);
+    gctx.scale(scale, scale);
+    gctx.font = '700 20px "Playfair Display", serif';
+    gctx.textAlign = 'center';
+    gctx.textBaseline = 'middle';
+    gctx.shadowColor = 'rgba(232,127,160,0.55)';
+    gctx.shadowBlur = 8;
+    gctx.fillStyle = '#E87FA0';
+    gctx.fillText('+1', 0, 0);
+    gctx.restore();
+  }
+  get dead() { return this.life >= this.maxLife; }
+}
+
 function startGame() {
   if (gRunning) return;
   gRunning = true; gScore = 0; gTime = 30; gHearts = []; gParticles = [];
@@ -1471,6 +1506,7 @@ gc.addEventListener('click', e => {
       for (let k = 0; k < 9; k++) {
         gParticles.push(new GSparkle(h.x, h.y + h.r * 0.5, sparkleColors[k % sparkleColors.length]));
       }
+      gParticles.push(new GScorePop(h.x, h.y + h.r * 0.2));
       document.getElementById('gScore').textContent = gScore;
       playPop(); break;
     }
