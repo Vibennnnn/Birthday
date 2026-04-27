@@ -247,6 +247,35 @@ body.loaded { opacity: 1; }
 }
 @keyframes twinkle { 0%,100% { opacity: 0.15; transform: scale(1); } 50% { opacity: 1; transform: scale(1.6); } }
 
+/* Shooting star — occasional streak across the night sky (a wish on its way) */
+.shooting-star {
+  position: absolute;
+  width: 90px; height: 1.5px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,230,240,0.15) 30%, rgba(255,255,255,0.95) 95%, white 100%);
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  transform-origin: right center;
+  filter: drop-shadow(0 0 4px rgba(255,210,230,0.8));
+  will-change: transform, opacity;
+}
+.shooting-star::after {
+  content: '';
+  position: absolute;
+  right: -1px; top: 50%;
+  width: 4px; height: 4px;
+  background: white;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  box-shadow: 0 0 6px 2px rgba(255,255,255,0.9), 0 0 14px 4px rgba(255,183,207,0.55);
+}
+@keyframes shoot {
+  0%   { opacity: 0; transform: translate(0, 0) rotate(var(--ang)) scaleX(0.4); }
+  12%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--ang)) scaleX(1); }
+}
+.shooting-star.go { animation: shoot var(--dur) cubic-bezier(0.25, 0.5, 0.45, 1) forwards; }
+
 .candles-title {
   font-family: var(--font-display); font-size: clamp(2rem, 6vw, 3.5rem);
   color: white; text-align: center; margin-bottom: 0.4rem;
@@ -1092,6 +1121,33 @@ for (let i = 0; i < 90; i++) {
   s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;width:${sz}px;height:${sz}px;--dur:${1.4+Math.random()*2.2}s;--delay:${Math.random()*3}s`;
   starsEl.appendChild(s);
 }
+
+// ===== SHOOTING STARS =====
+// One streaks across the night sky every several seconds — a wish on its way.
+function spawnShootingStar() {
+  if (document.hidden) return;
+  const star = document.createElement('div');
+  star.className = 'shooting-star';
+  const startX = Math.random() * 55;       // 0–55% from left
+  const startY = Math.random() * 30;       // 0–30% from top (upper sky)
+  const angle  = 14 + Math.random() * 14;  // gentle downward slope
+  const dist   = 260 + Math.random() * 220;
+  const rad    = angle * Math.PI / 180;
+  const dx     = Math.cos(rad) * dist;
+  const dy     = Math.sin(rad) * dist;
+  const dur    = 0.95 + Math.random() * 0.55;
+  star.style.cssText =
+    `left:${startX}%;top:${startY}%;` +
+    `--ang:${angle}deg;--dx:${dx}px;--dy:${dy}px;--dur:${dur}s`;
+  starsEl.appendChild(star);
+  requestAnimationFrame(() => star.classList.add('go'));
+  setTimeout(() => star.remove(), dur * 1000 + 200);
+}
+function scheduleShootingStar() {
+  const delay = 6000 + Math.random() * 9000;
+  setTimeout(() => { spawnShootingStar(); scheduleShootingStar(); }, delay);
+}
+scheduleShootingStar();
 
 // ===== CANDLES =====
 const candlesRow = document.getElementById('candlesRow');
