@@ -380,7 +380,35 @@ body.loaded { opacity: 1; }
 @keyframes pop-in { 0% { opacity:0; transform:scale(0.4); } 100% { opacity:1; transform:scale(1); } }
 
 /* ===== MESSAGES ===== */
-#messages { background: var(--cream); padding: 7rem 2rem; }
+#messages {
+  background: var(--cream); padding: 7rem 2rem;
+  position: relative; overflow: hidden;
+}
+
+/* Drifting petals — ambient background layer */
+.petals {
+  position: absolute; inset: 0; pointer-events: none;
+  z-index: 0; overflow: hidden;
+}
+.petal {
+  position: absolute; top: -40px;
+  width: var(--ps); height: calc(var(--ps) * 0.78);
+  background: radial-gradient(ellipse at 30% 30%, var(--pc1) 0%, var(--pc2) 60%, transparent 100%);
+  border-radius: 70% 30% 70% 30% / 50% 60% 40% 50%;
+  opacity: 0;
+  filter: blur(0.4px);
+  animation: petal-fall var(--pd) linear infinite var(--pdelay);
+  will-change: transform, opacity;
+}
+@keyframes petal-fall {
+  0%   { transform: translate3d(0, -40px, 0) rotate(0deg);   opacity: 0; }
+  8%   { opacity: var(--po); }
+  50%  { transform: translate3d(var(--px), 50vh, 0) rotate(180deg); }
+  92%  { opacity: var(--po); }
+  100% { transform: translate3d(calc(var(--px) * 2), 100vh, 0) rotate(360deg); opacity: 0; }
+}
+#messages > .section-header,
+#messages > .messages-grid { position: relative; z-index: 1; }
 
 .section-label { font-size: 0.72rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--blush-deep); margin-bottom: 0.7rem; }
 .section-title { font-family: var(--font-display); font-size: clamp(2.5rem, 6vw, 4rem); color: var(--mocha-500); }
@@ -861,6 +889,7 @@ happy birthday. i'm really glad you exist.</div>
 
 <!-- ===== MESSAGES ===== -->
 <section id="messages">
+  <div class="petals" id="petals"></div>
   <div class="section-header reveal">
     <p class="section-label">from kevin, with love</p>
     <h2 class="section-title">A few things I want you to know</h2>
@@ -1353,6 +1382,31 @@ photos.forEach(p => {
   gg.appendChild(div);
   revealObs.observe(div);
 });
+
+// ===== DRIFTING PETALS (messages section ambient) =====
+const petalsEl = document.getElementById('petals');
+const petalPalette = [
+  ['#FFD6E4', '#FFB7CF'], // soft pink → blush
+  ['#FFE4EC', '#FF9EC0'], // blush light → kitty pink
+  ['#F5E4D0', '#EDD5BE'], // cream-2 → mocha-100
+  ['#FFE4EC', '#E87FA0'], // blush light → blush-deep
+];
+for (let i = 0; i < 14; i++) {
+  const p = document.createElement('div');
+  p.className = 'petal';
+  const [c1, c2] = petalPalette[i % petalPalette.length];
+  const size = 10 + Math.random() * 14;
+  const drift = (Math.random() - 0.5) * 140;
+  const dur = 14 + Math.random() * 12;
+  const delay = -Math.random() * dur; // negative delay so they stagger from start
+  const opacity = 0.28 + Math.random() * 0.22;
+  p.style.cssText =
+    `left:${Math.random() * 100}%;` +
+    `--ps:${size}px;--px:${drift}px;` +
+    `--pd:${dur}s;--pdelay:${delay}s;` +
+    `--pc1:${c1};--pc2:${c2};--po:${opacity};`;
+  petalsEl.appendChild(p);
+}
 
 // ===== FLOATING HEARTS =====
 const fh = document.getElementById('floatHearts');
