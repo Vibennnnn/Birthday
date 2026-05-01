@@ -420,12 +420,39 @@ body.loaded { opacity: 1; }
   background: white; border-radius: 18px; padding: 2rem;
   box-shadow: 0 4px 30px rgba(0,0,0,0.06);
   transition: transform 0.3s, box-shadow 0.3s;
+  position: relative;
 }
 .msg-card:nth-child(1) { transform: rotate(-0.8deg); }
 .msg-card:nth-child(2) { transform: rotate(0.6deg); }
 .msg-card:nth-child(3) { transform: rotate(-0.5deg); }
 .msg-card:nth-child(4) { transform: rotate(0.9deg); }
 .msg-card:hover { transform: translateY(-5px) rotate(0deg) !important; box-shadow: 0 14px 44px rgba(0,0,0,0.1); }
+
+/* Washi tape — each card gets a different placement, like cards taped into a scrapbook. */
+.msg-card::before {
+  content: ''; position: absolute; top: -10px;
+  width: 68px; height: 20px;
+  background: linear-gradient(135deg, rgba(255,158,192,0.5) 0%, rgba(255,183,207,0.72) 50%, rgba(255,158,192,0.5) 100%);
+  border-left: 1px dashed rgba(255,255,255,0.4);
+  border-right: 1px dashed rgba(255,255,255,0.4);
+  box-shadow: 0 2px 6px rgba(107,66,38,0.12);
+  pointer-events: none; z-index: 2;
+  transition: transform 0.45s cubic-bezier(0.34,1.56,0.64,1);
+}
+.msg-card:nth-child(1)::before { left: 26px; transform: rotate(-8deg); }
+.msg-card:nth-child(2)::before {
+  right: 30px; transform: rotate(7deg);
+  background: linear-gradient(135deg, rgba(237,213,190,0.6) 0%, rgba(212,168,130,0.72) 50%, rgba(237,213,190,0.6) 100%);
+}
+.msg-card:nth-child(3)::before {
+  left: 50%; transform: translateX(-50%) rotate(-4deg);
+  background: linear-gradient(135deg, rgba(255,214,228,0.55) 0%, rgba(255,158,192,0.78) 50%, rgba(255,214,228,0.55) 100%);
+}
+.msg-card:nth-child(4)::before { right: 28px; transform: rotate(5deg); }
+.msg-card:hover:nth-child(1)::before,
+.msg-card:hover:nth-child(2)::before,
+.msg-card:hover:nth-child(4)::before { transform: rotate(0deg); }
+.msg-card:hover:nth-child(3)::before { transform: translateX(-50%) rotate(0deg); }
 
 .msg-icon { font-size: 2rem; margin-bottom: 1rem; }
 .msg-text { font-family: var(--font-serif); font-style: italic; font-size: 1rem; line-height: 1.85; color: var(--mocha-500); margin-bottom: 1.2rem; }
