@@ -459,7 +459,29 @@ body.loaded { opacity: 1; }
 .msg-from { font-size: 0.78rem; color: var(--mocha-300); text-align: right; }
 
 /* ===== GALLERY ===== */
-#gallery { background: var(--cream-2); padding: 7rem 2rem; }
+#gallery { background: var(--cream-2); padding: 7rem 2rem; position: relative; overflow: hidden; }
+
+/* Bokeh — soft warm light orbs drifting behind the polaroids, like sunlight on an old album. */
+.bokeh { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.bokeh-dot {
+  position: absolute;
+  width: var(--bk-sz); height: var(--bk-sz);
+  left: var(--bk-x); top: var(--bk-y);
+  background: radial-gradient(circle, var(--bk-col) 0%, transparent 72%);
+  border-radius: 50%;
+  opacity: 0;
+  filter: blur(2px);
+  animation: bokeh-drift var(--bk-dur) ease-in-out infinite var(--bk-delay);
+  will-change: transform, opacity;
+}
+@keyframes bokeh-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(0.85); opacity: 0; }
+  18%      { opacity: var(--bk-op); }
+  50%      { transform: translate3d(var(--bk-dx), var(--bk-dy), 0) scale(1.12); opacity: var(--bk-op); }
+  82%      { opacity: var(--bk-op); }
+}
+#gallery > .section-header,
+#gallery > .gallery-grid { position: relative; z-index: 1; }
 
 .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 1.8rem; max-width: 880px; margin: 0 auto; }
 
@@ -947,6 +969,7 @@ happy birthday. i'm really glad you exist.</div>
 
 <!-- ===== GALLERY ===== -->
 <section id="gallery">
+  <div class="bokeh" id="galleryBokeh"></div>
   <div class="section-header reveal">
     <p class="section-label">memories</p>
     <h2 class="section-title">Our Moments</h2>
@@ -1409,6 +1432,33 @@ photos.forEach(p => {
   gg.appendChild(div);
   revealObs.observe(div);
 });
+
+// ===== GALLERY BOKEH (soft warm light orbs behind the polaroids) =====
+const bokehEl = document.getElementById('galleryBokeh');
+const bokehColors = [
+  'rgba(255,249,245,0.85)', // cream
+  'rgba(255,228,236,0.75)', // blush-light
+  'rgba(255,214,228,0.7)',  // soft-pink
+  'rgba(255,158,192,0.45)', // kitty-pink (subtler)
+  'rgba(237,213,190,0.7)',  // mocha-100
+];
+for (let i = 0; i < 12; i++) {
+  const b = document.createElement('div');
+  b.className = 'bokeh-dot';
+  const size = 60 + Math.random() * 140;
+  const dur = 11 + Math.random() * 9;
+  b.style.cssText =
+    `--bk-sz:${size.toFixed(0)}px;` +
+    `--bk-x:${(Math.random() * 100).toFixed(1)}%;` +
+    `--bk-y:${(Math.random() * 100).toFixed(1)}%;` +
+    `--bk-dx:${((Math.random() - 0.5) * 80).toFixed(0)}px;` +
+    `--bk-dy:${((Math.random() - 0.5) * 60).toFixed(0)}px;` +
+    `--bk-dur:${dur.toFixed(1)}s;` +
+    `--bk-delay:${(-Math.random() * dur).toFixed(1)}s;` +
+    `--bk-op:${(0.35 + Math.random() * 0.35).toFixed(2)};` +
+    `--bk-col:${bokehColors[Math.floor(Math.random() * bokehColors.length)]}`;
+  bokehEl.appendChild(b);
+}
 
 // ===== DRIFTING PETALS (messages section ambient) =====
 const petalsEl = document.getElementById('petals');
