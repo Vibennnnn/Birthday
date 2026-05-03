@@ -1544,6 +1544,63 @@ document.getElementById('gBest').textContent = gBest;
 function resizeGC() { gc.width = gc.offsetWidth; }
 resizeGC(); window.addEventListener('resize', resizeGC);
 
+// ===== GAME IDLE SCREEN =====
+// Before the game starts (and after it ends), paint a warm cream→blush gradient
+// with a softly pulsing heart so the canvas isn't a blank rectangle.
+let idleRunning = false;
+let idleStartT = 0;
+
+function drawIdleFrame(elapsed) {
+  const w = gc.width, h = gc.height;
+  const grad = gctx.createRadialGradient(w/2, h/2, 20, w/2, h/2, Math.max(w, h) * 0.7);
+  grad.addColorStop(0, '#FFF9F5');
+  grad.addColorStop(1, '#FFE4EC');
+  gctx.fillStyle = grad;
+  gctx.fillRect(0, 0, w, h);
+
+  const cx = w/2;
+  const cy = h/2 - 22 + Math.sin(elapsed / 1100) * 6;
+  const pulse = 1 + Math.sin(elapsed / 820) * 0.08;
+  const s = 62 * pulse;
+
+  gctx.save();
+  gctx.globalAlpha = 0.55;
+  gctx.shadowColor = 'rgba(255,158,192,0.85)';
+  gctx.shadowBlur = 22 + Math.sin(elapsed / 820) * 8;
+  gctx.fillStyle = '#FFB7CF';
+  gctx.beginPath();
+  gctx.moveTo(cx, cy + s * 0.42);
+  gctx.bezierCurveTo(cx, cy, cx - s*0.62, cy, cx - s*0.62, cy + s*0.42);
+  gctx.bezierCurveTo(cx - s*0.62, cy + s*0.74, cx, cy + s, cx, cy + s*1.12);
+  gctx.bezierCurveTo(cx, cy + s, cx + s*0.62, cy + s*0.74, cx + s*0.62, cy + s*0.42);
+  gctx.bezierCurveTo(cx + s*0.62, cy, cx, cy, cx, cy + s*0.42);
+  gctx.fill();
+  gctx.restore();
+
+  gctx.save();
+  gctx.fillStyle = 'rgba(139,94,60,0.62)';
+  gctx.font = "600 13px Nunito, 'Helvetica Neue', sans-serif";
+  gctx.textAlign = 'center';
+  gctx.textBaseline = 'middle';
+  gctx.fillText("click start when you're ready  ♡", cx, cy + s * 1.4 + 22);
+  gctx.restore();
+}
+
+function idleLoop() {
+  if (gRunning) { idleRunning = false; return; }
+  drawIdleFrame(performance.now() - idleStartT);
+  requestAnimationFrame(idleLoop);
+}
+
+function startIdle() {
+  if (idleRunning) return;
+  idleRunning = true;
+  idleStartT = performance.now();
+  idleLoop();
+}
+
+startIdle();
+
 class GHeart {
   constructor() {
     this.x = 30 + Math.random() * (gc.width - 60);
@@ -1676,7 +1733,10 @@ function endGame(spawn) {
 }
 
 function gameLoop() {
-  if (!gRunning && gHearts.every(h => h.hit && h.alpha <= 0) && gParticles.length === 0) return;
+  if (!gRunning && gHearts.every(h => h.hit && h.alpha <= 0) && gParticles.length === 0) {
+    startIdle();
+    return;
+  }
   gctx.clearRect(0, 0, gc.width, gc.height);
   gctx.fillStyle = '#FFF9F5'; gctx.fillRect(0, 0, gc.width, gc.height);
   gHearts = gHearts.filter(h => !(h.y > gc.height + 40 || (h.hit && h.alpha <= 0)));
