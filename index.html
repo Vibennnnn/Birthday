@@ -321,6 +321,74 @@ body.loaded { opacity: 1; }
 
 .candles-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 560px; }
 
+/* ===== BIRTHDAY CAKE ===== */
+/* Two-tier frosted cake under the candles. The candle bodies sit just into the
+   top tier's frosting drip so they read as planted in the cake, not floating. */
+.cake-stage {
+  display: flex; flex-direction: column; align-items: center;
+  width: 100%; margin-bottom: 1rem;
+}
+.cake-stage .candles-row { margin-bottom: -6px; position: relative; z-index: 2; }
+
+.cake-tier {
+  position: relative;
+  border-radius: 6px 6px 10px 10px;
+  box-shadow:
+    0 8px 26px rgba(0,0,0,0.4),
+    inset 0 -10px 22px rgba(74,44,21,0.32),
+    inset 0 8px 16px rgba(255,255,255,0.18);
+}
+.cake-tier-top {
+  width: 340px; max-width: 80%; height: 52px;
+  background: linear-gradient(180deg, #FFE4EC 0%, #FFB7CF 55%, #E87FA0 100%);
+  z-index: 1;
+}
+.cake-tier-bottom {
+  width: 440px; max-width: 92%; height: 64px; margin-top: -2px;
+  background: linear-gradient(180deg, #D4A882 0%, #B5825A 55%, #8B5E3C 100%);
+}
+
+/* Frosting drip — a wavy cream band sitting on top of each tier. */
+.cake-tier::before {
+  content: ''; position: absolute;
+  top: -9px; left: 0; right: 0; height: 17px;
+  background: linear-gradient(180deg, #FFF9F5 0%, #FFE4EC 95%, #FFD6E4 100%);
+  clip-path: polygon(
+    0 100%, 0 50%,
+    4% 78%, 9% 38%, 14% 75%, 20% 46%, 27% 80%, 33% 48%,
+    40% 78%, 47% 40%, 54% 78%, 61% 46%, 68% 80%, 75% 42%,
+    82% 76%, 89% 48%, 96% 76%, 100% 50%,
+    100% 100%
+  );
+  filter: drop-shadow(0 2px 2px rgba(74,44,21,0.28));
+}
+
+/* Pink piped dots circling the bottom tier. */
+.cake-tier-bottom::after {
+  content: ''; position: absolute;
+  top: 50%; left: 0; right: 0; height: 8px;
+  transform: translateY(-50%);
+  background:
+    radial-gradient(circle 3.2px at 18px 4px, #FFD6E4 99%, transparent 100%) 0 0 / 36px 8px repeat-x;
+  opacity: 0.9;
+  filter: drop-shadow(0 1px 1px rgba(74,44,21,0.25));
+}
+
+/* Cake plate — slim ellipse beneath the bottom tier. */
+.cake-plate {
+  width: 500px; max-width: 96%; height: 14px;
+  margin-top: -2px;
+  background: linear-gradient(180deg, #EDD5BE 0%, #D4A882 55%, #8B5E3C 100%);
+  border-radius: 50% / 80%;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.5);
+}
+
+@media (max-width: 600px) {
+  .cake-tier-top { width: 260px; height: 46px; }
+  .cake-tier-bottom { width: 340px; height: 56px; }
+  .cake-plate { width: 380px; height: 12px; }
+}
+
 /* Single candle */
 .candle { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.2s; user-select: none; }
 .candle:hover:not(.out) { transform: scale(1.08); }
@@ -955,7 +1023,12 @@ body.loaded { opacity: 1; }
   <h2 class="candles-title">Make a Wish ✨</h2>
   <p class="candles-sub">click each candle to blow it out</p>
   <p class="candle-progress" id="candleProgress">0 / 14 candles blown out</p>
-  <div class="candles-row" id="candlesRow"></div>
+  <div class="cake-stage">
+    <div class="candles-row" id="candlesRow"></div>
+    <div class="cake-tier cake-tier-top"></div>
+    <div class="cake-tier cake-tier-bottom"></div>
+    <div class="cake-plate"></div>
+  </div>
   <button class="mic-btn" id="micBtn" onclick="toggleMicBlow()">use your breath instead ♡</button>
   <div class="mic-hint" id="micHint"></div>
   <div class="wish-msg" id="wishMsg">🎀 Make a wish, Iva! 🎀</div>
