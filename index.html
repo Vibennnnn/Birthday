@@ -1506,13 +1506,19 @@ function launchConfetti() {
   ccv.style.display = 'block';
   ccv.width = innerWidth; ccv.height = innerHeight;
   const cols = ['#FFB7C5','#E87FA0','#FFD6A5','#C4F5B5','#B5C8FF','#E8B5FF','#FFF0A5'];
+  const heartCols = ['#FF9EC0','#E87FA0','#FFB7C5','#FFD6E4'];
   for (let i = 0; i < 160; i++) {
+    const isHeart = Math.random() < 0.35;
     pieces.push({
       x: Math.random() * ccv.width, y: -10,
-      w: 7 + Math.random() * 9, h: 4 + Math.random() * 6,
-      color: cols[Math.floor(Math.random() * cols.length)],
+      w: isHeart ? 10 + Math.random() * 8 : 7 + Math.random() * 9,
+      h: 4 + Math.random() * 6,
+      color: isHeart
+        ? heartCols[Math.floor(Math.random() * heartCols.length)]
+        : cols[Math.floor(Math.random() * cols.length)],
       vx: (Math.random() - 0.5) * 5, vy: 2 + Math.random() * 4,
       rot: Math.random() * 360, rs: (Math.random() - 0.5) * 12,
+      shape: isHeart ? 'heart' : 'rect',
     });
   }
   animateConfetti();
@@ -1527,7 +1533,19 @@ function animateConfetti() {
     cctx.translate(p.x, p.y);
     cctx.rotate(p.rot * Math.PI / 180);
     cctx.fillStyle = p.color;
-    cctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+    if (p.shape === 'heart') {
+      const s = p.w;
+      cctx.translate(0, -s * 0.56);
+      cctx.beginPath();
+      cctx.moveTo(0, s * 0.42);
+      cctx.bezierCurveTo(0, 0, -s * 0.62, 0, -s * 0.62, s * 0.42);
+      cctx.bezierCurveTo(-s * 0.62, s * 0.74, 0, s, 0, s * 1.12);
+      cctx.bezierCurveTo(0, s, s * 0.62, s * 0.74, s * 0.62, s * 0.42);
+      cctx.bezierCurveTo(s * 0.62, 0, 0, 0, 0, s * 0.42);
+      cctx.fill();
+    } else {
+      cctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+    }
     cctx.restore();
   });
   pieces = pieces.filter(p => p.y < ccv.height + 20);
