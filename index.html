@@ -243,7 +243,18 @@ body.loaded { opacity: 1; }
   text-align: center; background: white; border-radius: 18px;
   padding: 1rem 1.3rem; box-shadow: 0 4px 24px rgba(0,0,0,0.07); min-width: 72px;
 }
-.countdown-num { font-family: var(--font-serif); font-size: 2rem; font-weight: 700; color: var(--mocha-500); line-height: 1; }
+.countdown-num {
+  font-family: var(--font-serif); font-size: 2rem; font-weight: 700;
+  color: var(--mocha-500); line-height: 1;
+  display: inline-block; transform-origin: 50% 60%;
+}
+/* Tick pulse — restarted from JS only when the number actually changes. */
+.countdown-num.tick { animation: cd-tick 0.55s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes cd-tick {
+  0%   { transform: scale(1);    color: var(--mocha-500); }
+  35%  { transform: scale(1.14); color: var(--blush-deep); }
+  100% { transform: scale(1);    color: var(--mocha-500); }
+}
 .countdown-label { font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mocha-300); margin-top: 0.3rem; }
 
 .scroll-hint {
@@ -1154,6 +1165,16 @@ function toggleMusic() {
 }
 
 // ===== COUNTDOWN =====
+// Only re-trigger the tick animation when the displayed number actually changes,
+// so seconds pulse every tick but minutes/hours/days only pulse on rollover.
+function setCdNum(id, value) {
+  const el = document.getElementById(id);
+  if (!el || el.textContent === value) return;
+  el.textContent = value;
+  el.classList.remove('tick');
+  void el.offsetWidth; // restart CSS animation
+  el.classList.add('tick');
+}
 function tick() {
   const target = new Date('2026-05-16T00:00:00');
   const now = new Date();
@@ -1167,10 +1188,10 @@ function tick() {
   const h = Math.floor((diff % 86400000) / 3600000);
   const m = Math.floor((diff % 3600000) / 60000);
   const s = Math.floor((diff % 60000) / 1000);
-  document.getElementById('cd-days').textContent = String(d).padStart(2,'0');
-  document.getElementById('cd-hrs').textContent  = String(h).padStart(2,'0');
-  document.getElementById('cd-mins').textContent = String(m).padStart(2,'0');
-  document.getElementById('cd-secs').textContent = String(s).padStart(2,'0');
+  setCdNum('cd-days', String(d).padStart(2,'0'));
+  setCdNum('cd-hrs',  String(h).padStart(2,'0'));
+  setCdNum('cd-mins', String(m).padStart(2,'0'));
+  setCdNum('cd-secs', String(s).padStart(2,'0'));
 }
 tick(); setInterval(tick, 1000);
 
