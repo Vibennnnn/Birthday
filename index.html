@@ -681,7 +681,7 @@ body.loaded { opacity: 1; }
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   padding: 6rem 2rem; text-align: center; position: relative; overflow: hidden;
 }
-.float-hearts { position: absolute; inset: 0; pointer-events: none; }
+.float-hearts { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
 .fh {
   position: absolute; opacity: 0.35;
   animation: fh-rise var(--dur) ease-in-out infinite var(--delay);
@@ -692,6 +692,39 @@ body.loaded { opacity: 1; }
   10% { opacity: 0.35; }
   90% { opacity: 0.35; }
   100% { transform: translateY(-15vh) rotate(25deg); opacity: 0; }
+}
+
+/* Fireflies — warm amber motes drifting through the closing section, like
+   summer-night fireflies. Completes the ambient layer carried through every
+   other section (sparkles, stars, petals, bokeh) so the final scene doesn't
+   feel visually empty next to them. */
+.fireflies { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+.firefly {
+  position: absolute;
+  width: var(--ff-sz); height: var(--ff-sz);
+  left: var(--ff-x); top: var(--ff-y);
+  background: radial-gradient(circle, rgba(255,238,180,0.95) 0%, rgba(255,200,140,0.55) 38%, transparent 72%);
+  border-radius: 50%;
+  opacity: 0;
+  filter: blur(0.4px);
+  animation:
+    ff-drift var(--ff-dur) ease-in-out infinite var(--ff-delay),
+    ff-glow  var(--ff-pulse) ease-in-out infinite var(--ff-delay);
+  will-change: transform, opacity;
+}
+@keyframes ff-drift {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  25%      { transform: translate3d(var(--ff-dx), calc(var(--ff-dy) * -0.6), 0); }
+  50%      { transform: translate3d(calc(var(--ff-dx) * -0.4), var(--ff-dy), 0); }
+  75%      { transform: translate3d(calc(var(--ff-dx) * 0.7), calc(var(--ff-dy) * 0.4), 0); }
+}
+@keyframes ff-glow {
+  0%, 100% { opacity: 0; }
+  18%, 82% { opacity: var(--ff-op); }
+  50%      { opacity: calc(var(--ff-op) * 0.35); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .firefly { animation: none; opacity: 0.5; }
 }
 .closing-title { font-family: var(--font-display); font-size: clamp(2.5rem, 8vw, 5rem); color: white; margin-bottom: 1.5rem; }
 .closing-body {
@@ -1135,6 +1168,7 @@ happy birthday. i'm really glad you exist.</div>
 
 <!-- ===== CLOSING ===== -->
 <section id="closing">
+  <div class="fireflies" id="fireflies"></div>
   <div class="float-hearts" id="floatHearts"></div>
   <h2 class="closing-title">Happy 14th, Iva 🎀</h2>
   <p class="closing-body">"Wishing you a year full of everything that makes you smile — coffee, good music, late nights, and people who actually deserve you."</p>
@@ -1652,6 +1686,28 @@ for (let i = 0; i < 14; i++) {
     `--pd:${dur}s;--pdelay:${delay}s;` +
     `--pc1:${c1};--pc2:${c2};--po:${opacity};`;
   petalsEl.appendChild(p);
+}
+
+// ===== CLOSING FIREFLIES =====
+// Warm amber glow motes drifting across the dark mocha closing section.
+const ffEl = document.getElementById('fireflies');
+for (let i = 0; i < 16; i++) {
+  const ff = document.createElement('div');
+  ff.className = 'firefly';
+  const sz = 3 + Math.random() * 5;
+  const dur = 9 + Math.random() * 9;
+  const pulse = 1.8 + Math.random() * 2.4;
+  ff.style.cssText =
+    `--ff-sz:${sz.toFixed(1)}px;` +
+    `--ff-x:${(Math.random() * 100).toFixed(1)}%;` +
+    `--ff-y:${(Math.random() * 100).toFixed(1)}%;` +
+    `--ff-dx:${((Math.random() - 0.5) * 90).toFixed(0)}px;` +
+    `--ff-dy:${((Math.random() - 0.5) * 70).toFixed(0)}px;` +
+    `--ff-dur:${dur.toFixed(1)}s;` +
+    `--ff-pulse:${pulse.toFixed(2)}s;` +
+    `--ff-delay:${(-Math.random() * dur).toFixed(1)}s;` +
+    `--ff-op:${(0.5 + Math.random() * 0.4).toFixed(2)};`;
+  ffEl.appendChild(ff);
 }
 
 // ===== FLOATING HEARTS =====
