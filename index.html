@@ -182,6 +182,30 @@ body.loaded { opacity: 1; }
   width: 11px; height: 7px; background: #FFD700; border-radius: 50%;
 }
 
+/* Soft pink cheek blush — a signature kawaii detail. Placed behind the
+   whiskers/nose/bow in source order so those stay on top. */
+.kitty-cheek {
+  position: absolute; top: 82px;
+  width: 22px; height: 12px;
+  background: radial-gradient(ellipse at center,
+    rgba(255,158,192,0.7) 0%,
+    rgba(255,183,207,0.45) 55%,
+    transparent 80%);
+  border-radius: 50%;
+  filter: blur(1.2px);
+  pointer-events: none;
+  animation: cheek-glow 4.8s ease-in-out infinite;
+}
+.kitty-cheek.left  { left: 16px; }
+.kitty-cheek.right { right: 16px; animation-delay: -2.4s; }
+@keyframes cheek-glow {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.08); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kitty-cheek { animation: none; }
+}
+
 .kitty-whiskers {
   position: absolute; top: 80px; left: 50%;
   transform: translateX(-50%); width: 130px;
@@ -1019,6 +1043,8 @@ body.loaded { opacity: 1; }
       <div class="kitty-ear right"><div class="kitty-ear-inner"></div></div>
       <div class="kitty-face">
         <div class="kitty-eyes"><div class="kitty-eye"></div><div class="kitty-eye"></div></div>
+        <div class="kitty-cheek left"></div>
+        <div class="kitty-cheek right"></div>
         <div class="kitty-nose"></div>
         <div class="kitty-whiskers">
           <div class="kitty-whisker-group left">
