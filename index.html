@@ -471,6 +471,8 @@ body.loaded { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
   .flame { animation: none; }
   .flame-glow { animation: none; }
+  .candle.out .flame { display: none; animation: none; }
+  .candle.out .candle-wick::before { animation: none; opacity: 0; }
 }
 
 .candle-smoke-wrap { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); pointer-events: none; }
@@ -484,7 +486,23 @@ body.loaded { opacity: 1; }
   100% { transform: translate(var(--sx), -44px) scale(3.5); opacity: 0; }
 }
 
-.candle-wick { width: 2px; height: 8px; background: #555; border-radius: 1px; }
+.candle-wick {
+  width: 2px; height: 8px; background: #555; border-radius: 1px;
+  position: relative;
+  transition: background 1.5s ease-out;
+}
+/* Ember tip — a hot coal that lingers on the wick after the flame is blown,
+   then cools to a dark wick. Adds a beat of warmth to each blow-out. */
+.candle-wick::before {
+  content: ''; position: absolute;
+  top: -3px; left: 50%;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #FFE9A0 0%, #FF7B2B 45%, #B8341A 82%, transparent 100%);
+  transform: translateX(-50%) scale(0);
+  opacity: 0; pointer-events: none;
+  filter: blur(0.4px);
+}
 .candle-body {
   width: 18px; height: 54px; border-radius: 4px 4px 3px 3px; position: relative;
 }
@@ -509,13 +527,27 @@ body.loaded { opacity: 1; }
 .c13 .candle-body { background: linear-gradient(180deg,#E8B5FF,#C980F5); }
 .c14 .candle-body { background: linear-gradient(180deg,#FFB7C5,#FF8FAB); }
 
-.candle.out .flame { display: none; }
+.candle.out .flame {
+  animation: flame-out 0.45s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+  pointer-events: none;
+}
+@keyframes flame-out {
+  0%   { opacity: 1;   transform: translateX(-50%) scaleX(1)    scaleY(1);    }
+  55%  { opacity: 0.7; transform: translateX(-50%) scaleX(1.25) scaleY(0.4);  }
+  100% { opacity: 0;   transform: translateX(-50%) scaleX(0.2)  scaleY(0.15); }
+}
 .candle.out .flame-glow {
   opacity: 0;
   transform: translateX(-50%) scale(0.55);
   animation: none;
 }
-.candle.out .candle-wick { background: #888; }
+.candle.out .candle-wick { background: #3d3d3d; }
+.candle.out .candle-wick::before { animation: wick-ember 1.6s ease-out forwards; }
+@keyframes wick-ember {
+  0%   { opacity: 1;   transform: translateX(-50%) scale(1.1);  box-shadow: 0 0 10px 3px rgba(255,123,43,0.75); }
+  55%  { opacity: 0.6; transform: translateX(-50%) scale(0.85); box-shadow: 0 0 6px  1px rgba(255,123,43,0.35); }
+  100% { opacity: 0;   transform: translateX(-50%) scale(0.55); box-shadow: 0 0 0   0   rgba(255,123,43,0); }
+}
 
 .wish-msg {
   display: none; font-family: var(--font-display); font-size: clamp(2rem, 6vw, 3rem);
