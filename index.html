@@ -914,8 +914,39 @@ body.loaded { opacity: 1; }
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   text-align: center; padding: 2rem; gap: 1.5rem;
   font-family: var(--font-body); color: var(--mocha-600);
+  overflow: hidden;
 }
 #lock-gate.hidden { display: none; }
+/* Keep gate content above the ambient heart layer. */
+#lock-gate > *:not(.lock-gate-bg) { position: relative; z-index: 1; }
+
+/* Ambient drifting hearts behind the gate — same family as hero sparkles,
+   gallery bokeh, closing fireflies — so the very first impression carries
+   the site's "alive" feel instead of a static gradient. */
+.lock-gate-bg {
+  position: absolute; inset: 0; pointer-events: none;
+  z-index: 0; overflow: hidden;
+}
+.lock-heart {
+  position: absolute;
+  left: var(--lh-x); bottom: -28px;
+  font-size: var(--lh-sz);
+  color: var(--lh-col);
+  opacity: 0;
+  filter: blur(0.3px);
+  animation: lh-rise var(--lh-dur) linear infinite var(--lh-delay);
+  will-change: transform, opacity;
+}
+@keyframes lh-rise {
+  0%   { transform: translate3d(0, 0, 0) rotate(-8deg);                                opacity: 0; }
+  10%  { opacity: var(--lh-op); }
+  50%  { transform: translate3d(var(--lh-sway), -55vh, 0) rotate(8deg); }
+  90%  { opacity: var(--lh-op); }
+  100% { transform: translate3d(calc(var(--lh-sway) * 0.4), -110vh, 0) rotate(-6deg);  opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lock-heart { animation: none; opacity: 0.25; transform: translateY(-40vh); }
+}
 .lock-kitty {
   width: 140px; height: 140px;
   background: radial-gradient(circle at 50% 55%, white 0%, white 55%, var(--blush-light) 100%);
@@ -981,6 +1012,7 @@ body.loaded { opacity: 1; }
 <body>
 
 <div id="lock-gate">
+  <div class="lock-gate-bg" id="lockGateBg"></div>
   <div class="lock-kitty"><div class="lock-bow"></div></div>
   <div class="lock-title">something's coming ♡</div>
   <div class="lock-days" id="lockDays">—</div>
@@ -1206,6 +1238,36 @@ const revealObs = new IntersectionObserver(entries => {
   }
   // Freeze scroll while gate is up
   document.body.style.overflow = 'hidden';
+
+  // Spawn ambient drifting hearts behind the gate — only when the gate
+  // is actually showing, so we save the work in unlocked / preview states.
+  const bg = document.getElementById('lockGateBg');
+  if (bg) {
+    const palette = [
+      'rgba(255,158,192,0.85)', // kitty pink
+      'rgba(232,127,160,0.80)', // blush deep
+      'rgba(255,183,207,0.80)', // blush
+      'rgba(212,168,130,0.70)', // mocha 200
+      'rgba(255,214,228,0.85)', // soft pink
+    ];
+    for (let i = 0; i < 14; i++) {
+      const h = document.createElement('div');
+      h.className = 'lock-heart';
+      h.textContent = Math.random() < 0.5 ? '♡' : '♥';
+      const sz = 10 + Math.random() * 16;
+      const dur = 13 + Math.random() * 10;
+      h.style.cssText =
+        `--lh-x:${(Math.random() * 100).toFixed(1)}%;` +
+        `--lh-sz:${sz.toFixed(1)}px;` +
+        `--lh-sway:${((Math.random() - 0.5) * 90).toFixed(0)}px;` +
+        `--lh-dur:${dur.toFixed(1)}s;` +
+        `--lh-delay:${(-Math.random() * dur).toFixed(1)}s;` +
+        `--lh-op:${(0.22 + Math.random() * 0.28).toFixed(2)};` +
+        `--lh-col:${palette[Math.floor(Math.random() * palette.length)]};`;
+      bg.appendChild(h);
+    }
+  }
+
   const daysEl = document.getElementById('lockDays');
   function tick() {
     const ms = unlockAt - Date.now();
