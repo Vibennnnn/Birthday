@@ -460,6 +460,27 @@ body.loaded { opacity: 1; }
   100% { transform: translate(var(--sx), -44px) scale(3.5); opacity: 0; }
 }
 
+/* Ember sparks — a few warm gold flecks fly up from the wick the moment the
+   flame is snuffed, before the cooler smoke takes over. Brief and bright. */
+.ember-p {
+  position: absolute;
+  width: 3px; height: 3px;
+  left: 50%; margin-left: -1.5px;
+  background: radial-gradient(circle, #FFF6D0 0%, #FFD060 38%, #FF8A2A 78%, transparent 100%);
+  border-radius: 50%;
+  box-shadow: 0 0 6px 1px rgba(255,170,60,0.75);
+  animation: ember-fly var(--ed) cubic-bezier(0.18, 0.62, 0.32, 1) forwards;
+  will-change: transform, opacity;
+}
+@keyframes ember-fly {
+  0%   { transform: translate(0, 0) scale(1.1); opacity: 1; }
+  55%  { opacity: 0.95; }
+  100% { transform: translate(var(--ex), var(--ey)) scale(0.25); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ember-p { animation: none; display: none; }
+}
+
 .candle-wick { width: 2px; height: 8px; background: #555; border-radius: 1px; }
 .candle-body {
   width: 18px; height: 54px; border-radius: 4px 4px 3px 3px; position: relative;
@@ -1471,6 +1492,18 @@ for (let i = 0; i < TOTAL; i++) {
       sp.style.cssText = `--sx:${sx}px;--sd:${0.9+p*0.25}s;--ss:${p*0.15}s;left:${p*3}px`;
       sw.appendChild(sp);
       setTimeout(() => sp.remove(), 2000);
+    }
+
+    // Ember sparks — gold flecks fly up before the smoke takes over
+    for (let e = 0; e < 6; e++) {
+      const em = document.createElement('div');
+      em.className = 'ember-p';
+      const ex = (Math.random() - 0.5) * 38;
+      const ey = -22 - Math.random() * 28;
+      const ed = 0.55 + Math.random() * 0.4;
+      em.style.cssText = `--ex:${ex.toFixed(0)}px;--ey:${ey.toFixed(0)}px;--ed:${ed.toFixed(2)}s`;
+      sw.appendChild(em);
+      setTimeout(() => em.remove(), ed * 1000 + 120);
     }
 
     document.getElementById('candleProgress').textContent = `${blown} / ${TOTAL} candles blown out`;
