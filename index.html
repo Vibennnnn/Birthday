@@ -94,6 +94,38 @@ body.loaded { opacity: 1; }
 }
 .lightbox-close:hover { background: rgba(255,255,255,0.3); transform: scale(1.1); }
 
+/* Prev/next arrows for stepping through the gallery without re-clicking polaroids. */
+.lightbox-nav {
+  position: absolute; top: 50%;
+  width: 48px; height: 48px; border-radius: 50%;
+  background: rgba(255,255,255,0.15); border: none; color: white;
+  font-size: 1.5rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, transform 0.25s;
+  -webkit-tap-highlight-color: transparent;
+}
+.lightbox-nav.prev { left: 1.5rem; transform: translateY(-50%); }
+.lightbox-nav.next { right: 1.5rem; transform: translateY(-50%); }
+.lightbox-nav.prev:hover { background: rgba(255,255,255,0.3); transform: translateY(-50%) translateX(-3px) scale(1.1); }
+.lightbox-nav.next:hover { background: rgba(255,255,255,0.3); transform: translateY(-50%) translateX(3px) scale(1.1); }
+.lightbox-counter {
+  position: absolute; bottom: 1.6rem; left: 50%; transform: translateX(-50%);
+  color: rgba(255,255,255,0.8); font-size: 0.72rem;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  pointer-events: none;
+}
+.lightbox img.swap { animation: lb-swap 0.32s ease; }
+@keyframes lb-swap {
+  0%   { opacity: 0; transform: scale(0.96); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@media (max-width: 600px) {
+  .lightbox-nav { width: 40px; height: 40px; font-size: 1.2rem; }
+  .lightbox-nav.prev { left: 0.6rem; }
+  .lightbox-nav.next { right: 0.6rem; }
+  .lightbox-counter { bottom: 0.9rem; font-size: 0.65rem; }
+}
+
 /* ===== HERO ===== */
 #hero {
   min-height: 100vh; display: flex; flex-direction: column;
@@ -999,8 +1031,11 @@ body.loaded { opacity: 1; }
   <div class="nav-dot" data-section="closing" data-label="love"></div>
 </nav>
 <div class="lightbox" id="lightbox">
-  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close">✕</button>
+  <button class="lightbox-nav prev" onclick="navLightbox(-1)" aria-label="Previous">‹</button>
   <img id="lightboxImg" src="" alt="">
+  <button class="lightbox-nav next" onclick="navLightbox(1)" aria-label="Next">›</button>
+  <div class="lightbox-counter" id="lightboxCounter"></div>
 </div>
 
 <canvas id="confetti-canvas"></canvas>
@@ -1223,17 +1258,41 @@ const revealObs = new IntersectionObserver(entries => {
 // ===== LIGHTBOX =====
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightboxImg');
-function openLightbox(src) {
-  lightboxImg.src = src;
+const lightboxCounter = document.getElementById('lightboxCounter');
+let lightboxIndex = 0;
+let lightboxList = [];
+
+function openLightbox(idx) {
+  if (!lightboxList.length) return;
+  lightboxIndex = ((idx % lightboxList.length) + lightboxList.length) % lightboxList.length;
+  lightboxImg.src = lightboxList[lightboxIndex];
+  lightboxCounter.textContent = `${lightboxIndex + 1} / ${lightboxList.length}`;
   lightbox.classList.add('open');
+  lightboxImg.classList.remove('swap');
+  void lightboxImg.offsetWidth;
+  lightboxImg.classList.add('swap');
   document.body.style.overflow = 'hidden';
 }
 function closeLightbox() {
   lightbox.classList.remove('open');
   document.body.style.overflow = '';
 }
+function navLightbox(dir) {
+  if (!lightbox.classList.contains('open') || lightboxList.length < 2) return;
+  lightboxIndex = ((lightboxIndex + dir) % lightboxList.length + lightboxList.length) % lightboxList.length;
+  lightboxImg.src = lightboxList[lightboxIndex];
+  lightboxCounter.textContent = `${lightboxIndex + 1} / ${lightboxList.length}`;
+  lightboxImg.classList.remove('swap');
+  void lightboxImg.offsetWidth;
+  lightboxImg.classList.add('swap');
+}
 lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLightbox();
+  if (!lightbox.classList.contains('open')) return;
+  if (e.key === 'ArrowLeft')  navLightbox(-1);
+  if (e.key === 'ArrowRight') navLightbox(1);
+});
 
 // ===== PAGE LOAD =====
 window.addEventListener('load', () => document.body.classList.add('loaded'));
@@ -1627,11 +1686,12 @@ const photos = [
   { src: 'Screenshot_20260414_160709_Gallery.webp', label: '♡' },
 ];
 const gg = document.getElementById('galleryGrid');
-photos.forEach(p => {
+lightboxList = photos.map(p => p.src);
+photos.forEach((p, idx) => {
   const div = document.createElement('div');
   div.className = 'polaroid reveal';
   div.innerHTML = `<div class="polaroid-img"><img src="${p.src}" alt="memory"></div><div class="polaroid-caption">${p.label}</div>`;
-  div.addEventListener('click', () => openLightbox(p.src));
+  div.addEventListener('click', () => openLightbox(idx));
   gg.appendChild(div);
   revealObs.observe(div);
 });
