@@ -495,11 +495,31 @@ body.loaded { opacity: 1; }
 
 .wish-msg {
   display: none; font-family: var(--font-display); font-size: clamp(2rem, 6vw, 3rem);
-  color: white; text-align: center; margin-top: 2.5rem;
-  animation: pop-in 0.8s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  text-align: center; margin-top: 2.5rem;
+  background: linear-gradient(
+    110deg,
+    #FFE4EC 0%,
+    #FF9EC0 22%,
+    #FFF9F5 50%,
+    #FF9EC0 78%,
+    #FFE4EC 100%
+  );
+  background-size: 240% 240%;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  filter: drop-shadow(0 0 14px rgba(255,158,192,0.55)) drop-shadow(0 2px 6px rgba(232,127,160,0.35));
+  animation:
+    pop-in 0.8s cubic-bezier(0.34,1.56,0.64,1) forwards,
+    wish-shimmer 5.5s ease-in-out 0.8s infinite;
 }
 .wish-msg.show { display: block; }
 @keyframes pop-in { 0% { opacity:0; transform:scale(0.4); } 100% { opacity:1; transform:scale(1); } }
+@keyframes wish-shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wish-msg { animation: pop-in 0.8s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+}
 
 /* ===== MESSAGES ===== */
 #messages {
