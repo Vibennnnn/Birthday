@@ -859,7 +859,33 @@ body.loaded { opacity: 1; }
 .music-btn.muted { opacity: 0.5; }
 
 /* ===== BIRTHDAY FACTS ===== */
-#facts { background: linear-gradient(135deg, #FFF0F6 0%, #F5E4D0 100%); padding: 7rem 2rem; }
+#facts { background: linear-gradient(135deg, #FFF0F6 0%, #F5E4D0 100%); padding: 7rem 2rem; position: relative; overflow: hidden; }
+
+/* Stardust — tiny twinkling glints suspended in the warm cream/pink gradient.
+   Completes the per-section ambient layer that runs through every other part
+   of the page (sparkles, stars, petals, bokeh, fireflies). */
+.stardust { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.stardust-dot {
+  position: absolute;
+  width: var(--sd-sz); height: var(--sd-sz);
+  left: var(--sd-x); top: var(--sd-y);
+  background: var(--sd-col);
+  border-radius: 50%;
+  opacity: 0;
+  box-shadow: 0 0 var(--sd-glow) var(--sd-col);
+  animation: stardust-twinkle var(--sd-dur) ease-in-out infinite var(--sd-delay);
+  will-change: opacity, transform;
+}
+@keyframes stardust-twinkle {
+  0%, 100% { opacity: 0; transform: scale(0.55); }
+  50%      { opacity: var(--sd-op); transform: scale(1.2); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stardust-dot { animation: none; opacity: calc(var(--sd-op) * 0.6); transform: scale(1); }
+}
+#facts > .section-header,
+#facts > .facts-grid { position: relative; z-index: 1; }
+
 .facts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; max-width: 860px; margin: 0 auto; }
 .fact-card {
   background: white; border-radius: 18px; padding: 1.8rem 1.5rem;
@@ -1272,6 +1298,7 @@ happy birthday. i'm really glad you exist.</div>
 
 <!-- ===== FACTS ===== -->
 <section id="facts">
+  <div class="stardust" id="factsStardust"></div>
   <div class="section-header reveal">
     <p class="section-label">did you know</p>
     <h2 class="section-title">14 & May 16</h2>
@@ -1824,6 +1851,34 @@ for (let i = 0; i < 14; i++) {
     `--pd:${dur}s;--pdelay:${delay}s;` +
     `--pc1:${c1};--pc2:${c2};--po:${opacity};`;
   petalsEl.appendChild(p);
+}
+
+// ===== FACTS STARDUST =====
+// Soft twinkling glints suspended in the warm cream/pink gradient — completes
+// the per-section ambient layer that runs through every other part of the page.
+const stardustEl = document.getElementById('factsStardust');
+const stardustColors = [
+  'rgba(255,158,192,0.85)',  // kitty pink
+  'rgba(232,127,160,0.7)',   // blush deep
+  'rgba(255,214,228,0.95)',  // soft pink
+  'rgba(255,234,180,0.85)',  // warm gold
+  'rgba(212,168,130,0.75)',  // mocha-200
+];
+for (let i = 0; i < 22; i++) {
+  const dot = document.createElement('div');
+  dot.className = 'stardust-dot';
+  const sz = 2 + Math.random() * 3.5;
+  const dur = 2.6 + Math.random() * 2.8;
+  dot.style.cssText =
+    `--sd-sz:${sz.toFixed(1)}px;` +
+    `--sd-x:${(Math.random() * 100).toFixed(1)}%;` +
+    `--sd-y:${(Math.random() * 100).toFixed(1)}%;` +
+    `--sd-glow:${(sz * 2.2).toFixed(1)}px;` +
+    `--sd-dur:${dur.toFixed(1)}s;` +
+    `--sd-delay:${(-Math.random() * dur).toFixed(1)}s;` +
+    `--sd-op:${(0.5 + Math.random() * 0.45).toFixed(2)};` +
+    `--sd-col:${stardustColors[Math.floor(Math.random() * stardustColors.length)]}`;
+  stardustEl.appendChild(dot);
 }
 
 // ===== CLOSING FIREFLIES =====
