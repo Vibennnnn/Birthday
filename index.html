@@ -644,6 +644,33 @@ body.loaded { opacity: 1; }
 .section-title { font-family: var(--font-display); font-size: clamp(2.5rem, 6vw, 4rem); color: var(--mocha-500); }
 .section-header { text-align: center; margin-bottom: 4rem; }
 
+/* Title flourish — a small pink heart flanked by two thin mocha lines that fade
+   at the outer edges. Sits below each section-title to tie the four content
+   sections together with one consistent stationery ornament. */
+.section-header::after {
+  content: '';
+  display: block;
+  width: 180px;
+  height: 16px;
+  margin: 1rem auto 0;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23E87FA0'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>"),
+    linear-gradient(to right,
+      transparent 0%,
+      rgba(212,168,130,0) 6%,
+      rgba(212,168,130,0.7) 22%,
+      rgba(212,168,130,0.7) 38%,
+      transparent 42%,
+      transparent 58%,
+      rgba(212,168,130,0.7) 62%,
+      rgba(212,168,130,0.7) 78%,
+      rgba(212,168,130,0) 94%,
+      transparent 100%);
+  background-size: 14px 14px, 100% 1px;
+  background-position: center, center;
+  background-repeat: no-repeat;
+}
+
 .messages-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 2rem; max-width: 860px; margin: 0 auto; }
 
 .msg-card {
