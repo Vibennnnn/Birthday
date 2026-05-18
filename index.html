@@ -194,7 +194,14 @@ body.loaded { opacity: 1; }
 
 .kitty-eyes {
   position: absolute; top: 52px; left: 50%;
-  transform: translateX(-50%); display: flex; gap: 28px;
+  /* JS updates --eye-x / --eye-y on mousemove so the pupils gently track the cursor. */
+  transform: translate(calc(-50% + var(--eye-x, 0px)), var(--eye-y, 0px));
+  display: flex; gap: 28px;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .kitty-eyes { transition: none; transform: translateX(-50%); }
 }
 .kitty-eye {
   width: 11px; height: 13px;
@@ -1598,6 +1605,41 @@ for (let i = 0; i < 32; i++) {
     `--sp-col:${sparkleColors[Math.floor(Math.random() * sparkleColors.length)]}`;
   heroSparklesEl.appendChild(sp);
 }
+
+// ===== KITTY EYE TRACKING =====
+// Pupils gently follow the cursor — gives Kitty a hint of life beyond the blink/float.
+(function trackKittyEyes() {
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const eyes = document.querySelector('.kitty-eyes');
+  const kitty = document.querySelector('.kitty');
+  if (!eyes || !kitty) return;
+  const MAX = 3;          // max pixel offset of the pupil pair
+  const REACH = 180;      // distance at which the pupils reach their max travel
+  let pending = false;
+  let cursorX = 0, cursorY = 0;
+
+  function update() {
+    pending = false;
+    const rect = kitty.getBoundingClientRect();
+    if (rect.bottom < 0 || rect.top > innerHeight) return;
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2 - 12; // eye line sits a bit above face center
+    const dx = cursorX - cx;
+    const dy = cursorY - cy;
+    const reach = Math.max(REACH, Math.hypot(dx, dy));
+    eyes.style.setProperty('--eye-x', (dx / reach * MAX).toFixed(2) + 'px');
+    eyes.style.setProperty('--eye-y', (dy / reach * MAX).toFixed(2) + 'px');
+  }
+
+  window.addEventListener('mousemove', (e) => {
+    cursorX = e.clientX;
+    cursorY = e.clientY;
+    if (!pending) {
+      pending = true;
+      requestAnimationFrame(update);
+    }
+  }, { passive: true });
+})();
 
 // ===== CANDLES =====
 const candlesRow = document.getElementById('candlesRow');
